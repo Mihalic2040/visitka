@@ -40,3 +40,87 @@ main {
 }
 
 h1, h2, h3, p { margin: 0 0 1rem; }
+
+/* Hero layout */
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* vertical center */
+  align-items: flex-start; /* left align */
+  min-height: 100vh; /* center relative to viewport */
+  max-width: 640px;
+  /* top/right/bottom use previous formula, left gets a bit more space */
+  padding: clamp(2rem, 5vw, 4rem) 3rem clamp(2rem, 5vw, 4rem) clamp(2.5rem, 6vw, 5rem);
+}
+
+.hero__title {
+  /* Increased size: larger min, more responsive growth, larger max */
+  font-size: clamp(3.25rem, 8vw, 5rem);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #ffffff, #d08bff 55%, #7b2bff);
+  background-clip: text; /* Standard property */
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.hero__subtitle {
+  font-size: clamp(1.125rem, 2.2vw, 1.5rem);
+  font-weight: 500;
+  opacity: 0.85;
+  margin-top: -0.25rem;
+}
+
+.hero__text {
+  font-size: 1rem;
+  line-height: 1.55;
+  max-width: 48ch;
+  opacity: 0.8;
+}
+
+.hero__links { display: flex; gap: 1rem; margin-top: 1.25rem; }
+
+/* Buttons */
+.btn {
+  --btn-bg: #6b00c6;
+  --btn-bg-hover: #8d33ff;
+  --btn-border: #8d33ff;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.85rem 1.35rem;
+  border-radius: 0.65rem;
+  text-decoration: none;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease, transform .25s ease;
+  user-select: none;
+  backdrop-filter: blur(2px);
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--btn-bg), var(--btn-bg-hover));
+  color: #fff;
+  box-shadow: 0 4px 16px -4px rgba(140, 48, 255, 0.55), 0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+.btn--primary:hover { transform: translateY(-2px); box-shadow: 0 6px 22px -6px rgba(140,48,255,0.7); }
+.btn--primary:active { transform: translateY(0); }
+
+.btn--ghost {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.btn--ghost:hover { background: rgba(255,255,255,0.15); }
+.btn--ghost:active { background: rgba(255,255,255,0.1); }
+
+/* Responsive tweak */
+@media (max-width: 560px) {
+  .hero { padding: 2rem 1.5rem; }
+  .hero__links { flex-wrap: wrap; }
+}
