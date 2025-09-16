@@ -56,3 +56,62 @@ window.addEventListener('beforeunload', () => {
     vantaEffect = null;
   }
 });
+
+// ===================== Typing Animation =====================
+function startTyping() {
+  const el = document.querySelector('.typing-text');
+  if (!el) return;
+  let frames;
+  try {
+    frames = JSON.parse(el.getAttribute('data-frames'));
+  } catch (e) {
+    frames = [el.textContent.trim()];
+  }
+  if (!Array.isArray(frames) || frames.length === 0) return;
+
+  const cursor = document.querySelector('.cursor');
+  const typeDelay = 85; // per character
+  const framePause = 800; // after frame complete
+  const deleteSpeed = 38; // per char when deleting (if we ever add deletion)
+  let frameIndex = 0;
+  let charIndex = 0;
+  let current = '';
+  let baseCompleted = false;
+
+  function typeFrame() {
+    if (frameIndex === 0) {
+      const target = frames[0];
+      if (charIndex <= target.length) {
+        current = target.slice(0, charIndex);
+        el.textContent = current;
+        charIndex++;
+        return void setTimeout(typeFrame, typeDelay);
+      }
+      // first frame finished
+      baseCompleted = true;
+      frameIndex = 1;
+      charIndex = frames[0].length; // start from existing length
+      return setTimeout(typeFrame, framePause);
+    } else if (frameIndex === 1) {
+      const full = frames[1];
+      // Only type the extra characters beyond base length
+      if (charIndex < full.length) {
+        charIndex++;
+        el.textContent = full.slice(0, charIndex);
+        return void setTimeout(typeFrame, typeDelay);
+      }
+      // Done all
+      cursor && (cursor.style.opacity = '1');
+      return; // stop
+    }
+  }
+
+  // slight initial delay to let layout settle
+  setTimeout(typeFrame, 400);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startTyping);
+} else {
+  startTyping();
+}

@@ -5,7 +5,7 @@ html, body {
   height: 100%;
   width: 100%;
   overflow: hidden; /* Prevent scrolling */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Outfit', system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
   background: #000000; /* Fallback color matches Vanta background to prevent color shift */
   color: #f5f5f5;
 }
@@ -54,17 +54,54 @@ h1, h2, h3, p { margin: 0 0 1rem; }
 }
 
 .hero__title {
-  /* Increased size: larger min, more responsive growth, larger max */
-  font-size: clamp(3.25rem, 8vw, 5rem);
-  line-height: 1.05;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: clamp(3.5rem, 9vw, 6rem); /* Bigger */
+  line-height: 0.95;
+  font-weight: 800; /* Bolder */
+  letter-spacing: -0.035em;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, #ffffff, #d08bff 55%, #7b2bff);
-  background-clip: text; /* Standard property */
-  -webkit-background-clip: text;
-  color: transparent;
+  color: #ffffff; /* Solid white */
+  text-shadow: 0 0 12px rgba(255,255,255,0.15), 0 6px 28px rgba(140,80,255,0.35);
+  white-space: nowrap; /* Keep typed text + cursor on one line */
 }
+
+.hero__title .typing-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.cursor {
+  display: inline-block;
+  width: 0; /* caret via border, avoids wrapping due to extra width */
+  height: 1em;
+  margin-left: 0.18rem;
+  border-left: 0.12em solid #ffffff !important; /* force white even if extension overrides */
+  animation: blink 1s steps(1, end) infinite;
+  vertical-align: -0.05em;
+  box-shadow: 0 0 6px rgba(255,255,255,0.65);
+  /* Prevent color manipulation by some dark-mode extensions */
+  color: #ffffff !important;
+  background: transparent !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  isolation: isolate;
+}
+
+/* Extra specificity fallback (in case extension injects generic rules) */
+body .hero__title .cursor {
+  border-left-color: #ffffff !important;
+}
+
+/* Optional: neutral hint to engines about color adaptation */
+.cursor { color-scheme: only light; }
+
+@keyframes blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* Fade in effect for each completed frame (handled via adding .frame-done) */
+.typing-text.frame-fade { opacity: 0; animation: fadeIn 380ms ease forwards; }
+@keyframes fadeIn { from { opacity: 0; filter: blur(4px); } to { opacity:1; filter: blur(0); } }
 
 .hero__subtitle {
   font-size: clamp(1.125rem, 2.2vw, 1.5rem);
