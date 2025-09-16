@@ -39,17 +39,31 @@ jobs:
 
       - name: Prepare dist folder
         run: |
+          set -euo pipefail
+          echo "Working dir: $(pwd)"
+          echo "Listing root files:"; ls -1 || true
           mkdir -p dist
-          # If a build produced artifacts, prefer those. Otherwise copy root static assets.
           if [ ! -f dist/index.html ]; then
-            echo "Copying static root files to dist/";
+            echo "Preparing static files..."
+            files_copied=0
             for f in index.html style.css main.js; do
-              [ -f "$f" ] && cp "$f" dist/;
+              if [ -f "$f" ]; then
+                echo "Copying $f"; cp "$f" dist/; files_copied=$((files_copied+1));
+              else
+                echo "(skip) $f not found";
+              fi
             done
-            [ -d assets ] && cp -r assets dist/assets;
+            if [ -d assets ]; then
+              echo "Syncing assets/"; rsync -a assets/ dist/assets/ || cp -r assets dist/assets || true
+            fi
+            if [ $files_copied -eq 0 ] && [ ! -d assets ]; then
+              echo "WARNING: No core static files found; creating placeholder index.html";
+              echo '<!DOCTYPE html><meta charset="utf-8"><title>Empty Site</title><h1>Placeholder</h1>' > dist/index.html
+            fi
           else
-            echo "Build output already contains index.html";
+            echo "Existing build output detected (dist/index.html present)."
           fi
+          echo "Dist contents:"; ls -al dist
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
