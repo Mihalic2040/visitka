@@ -113,6 +113,11 @@ document.addEventListener('typing:complete', () => {
   // Trigger background fade-in now
   const bg = document.getElementById('your-element-selector');
   if (bg) bg.classList.add('is-visible');
+  // Reveal social links after slight delay
+  setTimeout(() => {
+    const socials = document.querySelector('.social-links');
+    if (socials) socials.classList.add('reveal');
+  }, 450);
   // Animate size from 2 -> 3 while fading in
   animateVantaSize(1.3, 3, 1400);
 });
