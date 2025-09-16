@@ -20,28 +20,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node (for potential future tooling)
+      # Only set up Node & caching if a lock file exists to avoid warnings
+      - name: Setup Node (only if lock file present)
+        if: ${{ hashFiles('package-lock.json') != '' || hashFiles('npm-shrinkwrap.json') != '' || hashFiles('yarn.lock') != '' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
         
       - name: Install (skip if no package.json)
-        run: |
-          if [ -f package.json ]; then npm ci; else echo "No package.json, skipping install"; fi
+        if: ${{ hashFiles('package.json') != '' }}
+        run: npm ci
 
       - name: Build (skip if no build script)
+        if: ${{ hashFiles('package.json') != '' }}
         run: |
-          if [ -f package.json ] && npm pkg get scripts.build | grep -qv 'undefined'; then npm run build; else echo "No build script, copying static files"; fi
+          if npm pkg get scripts.build | grep -qv 'undefined'; then npm run build; else echo "No build script defined"; fi
 
       - name: Prepare dist folder
         run: |
-          if [ -d dist ]; then echo "dist exists"; else mkdir dist; fi
-          # If no build, copy root static files
-          if [ -f index.html ]; then cp -r index.html style.css main.js dist/; fi
-          # Copy any assets folder if present
-          if [ -d assets ]; then cp -r assets dist/assets; fi
+          mkdir -p dist
+          # If a build produced artifacts, prefer those. Otherwise copy root static assets.
+          if [ ! -f dist/index.html ]; then
+            echo "Copying static root files to dist/";
+            for f in index.html style.css main.js; do
+              [ -f "$f" ] && cp "$f" dist/;
+            done
+            [ -d assets ] && cp -r assets dist/assets;
+          else
+            echo "Build output already contains index.html";
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
