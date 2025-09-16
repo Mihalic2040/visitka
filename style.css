@@ -106,8 +106,15 @@ body .hero__title .cursor {
 .hero__subtitle {
   font-size: clamp(1.125rem, 2.2vw, 1.5rem);
   font-weight: 500;
-  opacity: 0.85;
+  opacity: 0; /* hidden until typing complete */
   margin-top: -0.25rem;
+  transform: translateY(18px);
+  transition: opacity .65s ease, transform .75s cubic-bezier(.22,.9,.3,1);
+}
+
+.hero__subtitle.reveal-from-bottom {
+  opacity: 0.85;
+  transform: translateY(0);
 }
 
 .hero__text {

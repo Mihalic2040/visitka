@@ -22,11 +22,7 @@ function initVanta() {
   if (!vantaEffect) {
     console.warn('Vanta effect did not initialize.');
   }
-  // Fade in once a frame has likely rendered
-  requestAnimationFrame(() => {
-    const bg = document.getElementById('your-element-selector');
-    if (bg) bg.classList.add('is-visible');
-  });
+  // Do NOT fade in yet; wait until typing finished.
 }
 
 // Initialize after DOM ready
@@ -37,17 +33,7 @@ if (document.readyState === 'loading') {
 }
 
 // Safety timeout: log if still not initialized after 3 seconds
-setTimeout(() => {
-  if (!vantaEffect) {
-    console.warn('Vanta still not initialized after 3s. Check network (three.js & vanta) and element ID.');
-  } else {
-    // Safety: ensure class applied even if earlier RAF missed
-    const bg = document.getElementById('your-element-selector');
-    if (bg && !bg.classList.contains('is-visible')) {
-      bg.classList.add('is-visible');
-    }
-  }
-}, 3000);
+// Removed early safety fade-in: background reveals only after typing completion.
 
 // Optional: clean up if page uses SPA navigation (placeholder)
 window.addEventListener('beforeunload', () => {
@@ -93,15 +79,17 @@ function startTyping() {
       charIndex = frames[0].length; // start from existing length
       return setTimeout(typeFrame, framePause);
     } else if (frameIndex === 1) {
-      const full = frames[1];
+  const full = frames[1];
       // Only type the extra characters beyond base length
       if (charIndex < full.length) {
         charIndex++;
         el.textContent = full.slice(0, charIndex);
         return void setTimeout(typeFrame, typeDelay);
       }
-      // Done all
+  // Done all
       cursor && (cursor.style.opacity = '1');
+  // Notify rest of UI that typing finished
+  document.dispatchEvent(new CustomEvent('typing:complete'));
       return; // stop
     }
   }
@@ -115,3 +103,14 @@ if (document.readyState === 'loading') {
 } else {
   startTyping();
 }
+
+// Reveal subtitle after typing completes
+document.addEventListener('typing:complete', () => {
+  const sub = document.querySelector('.hero__subtitle');
+  if (sub) {
+    sub.classList.add('reveal-from-bottom');
+  }
+  // Trigger background fade-in now
+  const bg = document.getElementById('your-element-selector');
+  if (bg) bg.classList.add('is-visible');
+});
