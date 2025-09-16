@@ -112,7 +112,17 @@ document.addEventListener('typing:complete', () => {
   }
   // Trigger background fade-in now
   const bg = document.getElementById('your-element-selector');
-  if (bg) bg.classList.add('is-visible');
+  if (bg) {
+    // Force reflow & delay to ensure styles applied before class toggle (mobile Safari quirks)
+    void bg.offsetWidth; // reflow
+    requestAnimationFrame(() => {
+      bg.classList.add('is-visible');
+    });
+    // Fallback: ensure visibility after 2s if first attempt missed
+    setTimeout(() => {
+      if (!bg.classList.contains('is-visible')) bg.classList.add('is-visible');
+    }, 2000);
+  }
   // Reveal social links after slight delay
   setTimeout(() => {
     const socials = document.querySelector('.social-links');

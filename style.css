@@ -21,6 +21,7 @@ html, body {
   pointer-events: none; /* Allow clicks to pass through */
   opacity: 0; /* Start hidden for fade-in */
   transition: opacity 1.4s ease; /* Fade timing */
+  will-change: opacity;
 }
 
 #your-element-selector.is-visible {
@@ -29,7 +30,8 @@ html, body {
 
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  #your-element-selector { transition: none; opacity: 1; }
+  /* Respect reduced motion by shortening the transition instead of fully disabling fade */
+  #your-element-selector { transition: opacity .2s linear; }
 }
 
 /* Example content styling (optional) */
@@ -233,6 +235,22 @@ body .hero__title .cursor {
 
 /* Responsive tweak */
 @media (max-width: 560px) {
-  .hero { padding: 2rem 1.5rem; }
-  .hero__links { flex-wrap: wrap; }
+  .hero {
+    padding: 2rem 1.25rem;
+    align-items: center; /* center horizontally */
+    text-align: center;
+  }
+  .hero__title { 
+    white-space: normal; /* allow wrapping instead of forcing horizontal scroll */
+    font-size: clamp(2.4rem, 11vw, 3.4rem); /* scale down on small screens */
+  }
+  .hero__title .typing-text { white-space: normal; }
+  .hero__subtitle { max-width: 90%; }
+  .hero__links { flex-wrap: wrap; justify-content: center; }
+}
+
+/* Even narrower devices (very small phones) */
+@media (max-width: 380px) {
+  .hero { padding: 1.75rem 1rem; }
+  .hero__title { font-size: clamp(2.1rem, 12vw, 3rem); letter-spacing: -0.02em; }
 }
