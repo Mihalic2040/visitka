@@ -17,7 +17,7 @@ function initVanta() {
   backgroundColor: 0x000000,
     amplitudeFactor: 3.0,
     xOffset: 0.30,
-    size: 3.0
+  size: 2.0 // start smaller, will animate to 3.0
   });
   if (!vantaEffect) {
     console.warn('Vanta effect did not initialize.');
@@ -113,4 +113,34 @@ document.addEventListener('typing:complete', () => {
   // Trigger background fade-in now
   const bg = document.getElementById('your-element-selector');
   if (bg) bg.classList.add('is-visible');
+  // Animate size from 2 -> 3 while fading in
+  animateVantaSize(1.3, 3, 1400);
 });
+
+// Smoothly animate the Vanta size parameter
+function animateVantaSize(from, to, duration) {
+  const startTime = performance.now();
+  function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+  function step(now) {
+    if (!vantaEffect) return; // effect not ready
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = easeInOutQuad(t);
+    const val = from + (to - from) * eased;
+    applyVantaSize(val);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function applyVantaSize(val) {
+  try {
+    if (!vantaEffect) return;
+    if (typeof vantaEffect.setOptions === 'function') {
+      vantaEffect.setOptions({ size: val });
+    } else if (vantaEffect.options) {
+      vantaEffect.options.size = val;
+    }
+  } catch (e) {
+    // Silently ignore—non-critical visual enhancement
+  }
+}
