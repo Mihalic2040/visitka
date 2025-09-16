@@ -120,10 +120,20 @@ document.addEventListener('typing:complete', () => {
     void bg.offsetWidth; // reflow
     requestAnimationFrame(() => {
       bg.classList.add('is-visible');
+      // On mobile explicitly add force-fade class
+      if (isMobileDevice()) bg.classList.add('force-fade');
     });
     // Fallback: ensure visibility after 2s if first attempt missed
     setTimeout(() => {
-      if (!bg.classList.contains('is-visible')) bg.classList.add('is-visible');
+      if (!bg.classList.contains('is-visible')) {
+        bg.classList.add('is-visible');
+        if (isMobileDevice()) bg.classList.add('force-fade');
+      }
+      // If opacity still near 0 (some browsers ignore transition), run JS tween
+      const computed = getComputedStyle(bg).opacity;
+      if (parseFloat(computed) < 0.2) {
+        jsOpacityTween(bg, 0, 1, 900);
+      }
     }, 2000);
   }
   // Reveal social links after slight delay
@@ -161,6 +171,24 @@ function applyVantaSize(val) {
   } catch (e) {
     // Silently ignore—non-critical visual enhancement
   }
+}
+
+// ===== Mobile Fade-in Fallback Helpers =====
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod|Samsung|Opera Mini|IEMobile/i.test(navigator.userAgent) || (window.matchMedia && window.matchMedia('(max-width: 820px)').matches);
+}
+
+function jsOpacityTween(el, from, to, duration) {
+  let start = null;
+  el.style.opacity = from;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min(1, (ts - start) / duration);
+    const eased = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p; // easeInOutQuad
+    el.style.opacity = (from + (to - from) * eased).toString();
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 // ===================== Loader control =====================
