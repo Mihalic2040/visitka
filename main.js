@@ -1,5 +1,7 @@
 // Initialize Vanta Halo effect once scripts are loaded
 let vantaEffect;
+let vantaReady = false;
+let typingStarted = false;
 
 function initVanta() {
   if (vantaEffect) return; // already initialized
@@ -21,9 +23,10 @@ function initVanta() {
   });
   if (!vantaEffect) {
     console.warn('Vanta effect did not initialize.');
+  } else {
+    // Wait until the internal canvas is alive & painted at least one frame
+    waitForVantaReady();
   }
-  // Once Vanta is initialized we can consider removing loader (will still wait for typing start)
-  maybeHideLoader('vanta');
   // Do NOT fade in yet; wait until typing finished.
 }
 
@@ -47,6 +50,8 @@ window.addEventListener('beforeunload', () => {
 
 // ===================== Typing Animation =====================
 function startTyping() {
+  if (typingStarted) return; // prevent double start
+  typingStarted = true;
   const el = document.querySelector('.typing-text');
   if (!el) return;
   let frames;
@@ -98,7 +103,6 @@ function startTyping() {
 
   // slight initial delay to let layout settle
   setTimeout(typeFrame, 400);
-  maybeHideLoader('typing');
 }
 
 if (document.readyState === 'loading') {
@@ -191,20 +195,43 @@ function jsOpacityTween(el, from, to, duration) {
   requestAnimationFrame(step);
 }
 
-// ===================== Loader control =====================
-let loaderStates = { vanta: false, typing: false };
-function maybeHideLoader(mark) {
-  if (mark) loaderStates[mark] = true;
-  const loader = document.getElementById('app-loader');
-  if (!loader) return;
-  // Hide when both Vanta attempted init and typing started OR after timeout
-  if ((loaderStates.vanta && loaderStates.typing)) {
-    requestAnimationFrame(() => loader.classList.add('is-hidden'));
+// ===================== Vanta readiness & Loader control =====================
+function waitForVantaReady() {
+  const start = performance.now();
+  const maxWait = 8000; // ms absolute fallback
+  function check() {
+    if (!vantaEffect) return; // effect destroyed or not present
+    const canvas = document.querySelector('#your-element-selector canvas');
+    if (canvas && canvas.width > 0 && canvas.height > 0) {
+      // Add a short delay to ensure first frame actually painted
+      if (performance.now() - start > 120) {
+        markVantaReady();
+        return;
+      }
+    }
+    if (performance.now() - start < maxWait) {
+      requestAnimationFrame(check);
+    } else {
+      console.warn('Vanta readiness timeout reached, proceeding.');
+      markVantaReady();
+    }
   }
+  requestAnimationFrame(check);
 }
 
-// Absolute fallback: hide loader after 6s no matter what
-setTimeout(() => {
+function markVantaReady() {
+  if (vantaReady) return;
+  vantaReady = true;
   const loader = document.getElementById('app-loader');
-  if (loader && !loader.classList.contains('is-hidden')) loader.classList.add('is-hidden');
-}, 6000);
+  if (loader) loader.classList.add('is-hidden');
+  // Start typing only after background ready (ensures user sees whole sequence cleanly)
+  startTyping();
+}
+
+// Absolute emergency fallback: if something blocked readiness entirely.
+setTimeout(() => {
+  if (!vantaReady) {
+    console.warn('Emergency loader fallback triggered.');
+    markVantaReady();
+  }
+}, 10000);
