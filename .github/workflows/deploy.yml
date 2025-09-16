@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
       # Only set up Node & caching if a lock file exists to avoid warnings
       - name: Setup Node (only if lock file present)
         if: ${{ hashFiles('package-lock.json') != '' || hashFiles('npm-shrinkwrap.json') != '' || hashFiles('yarn.lock') != '' }}
