@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+<div id="app-loader" class="app-loader" aria-live="polite" aria-label="Loading site" role="status">
+    <div class="app-loader__inner">
+        <div class="app-loader__spinner"></div>
+        <div class="app-loader__text">Loading<span class="dot d1">.</span><span class="dot d2">.</span><span class="dot d3">.</span></div>
+    </div>
+</div>
 <div id="your-element-selector" aria-hidden="true"></div>
 <main class="hero" role="main">
     <h1 class="hero__title" id="hero-title"><span class="typing-text" data-frames='["Michael", "Michael Bevza."]'></span><span class="cursor" aria-hidden="true"></span></h1>

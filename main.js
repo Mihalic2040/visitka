@@ -22,6 +22,8 @@ function initVanta() {
   if (!vantaEffect) {
     console.warn('Vanta effect did not initialize.');
   }
+  // Once Vanta is initialized we can consider removing loader (will still wait for typing start)
+  maybeHideLoader('vanta');
   // Do NOT fade in yet; wait until typing finished.
 }
 
@@ -96,6 +98,7 @@ function startTyping() {
 
   // slight initial delay to let layout settle
   setTimeout(typeFrame, 400);
+  maybeHideLoader('typing');
 }
 
 if (document.readyState === 'loading') {
@@ -159,3 +162,21 @@ function applyVantaSize(val) {
     // Silently ignore—non-critical visual enhancement
   }
 }
+
+// ===================== Loader control =====================
+let loaderStates = { vanta: false, typing: false };
+function maybeHideLoader(mark) {
+  if (mark) loaderStates[mark] = true;
+  const loader = document.getElementById('app-loader');
+  if (!loader) return;
+  // Hide when both Vanta attempted init and typing started OR after timeout
+  if ((loaderStates.vanta && loaderStates.typing)) {
+    requestAnimationFrame(() => loader.classList.add('is-hidden'));
+  }
+}
+
+// Absolute fallback: hide loader after 6s no matter what
+setTimeout(() => {
+  const loader = document.getElementById('app-loader');
+  if (loader && !loader.classList.contains('is-hidden')) loader.classList.add('is-hidden');
+}, 6000);
